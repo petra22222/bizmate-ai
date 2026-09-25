@@ -10,12 +10,12 @@ import fallbackConfig from '../../firebase-applet-config.json';
 
 // Support both environment variables and fallback config from AI Studio
 const firebaseConfig = {
-  apiKey: "AIzaSyBGKslc4yPJi3wYx2xYvICWXgAZnN0csds",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || fallbackConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || fallbackConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || fallbackConfig.storageBucket,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || fallbackConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || fallbackConfig.appId,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBGKslc4yPJi3wYx2xYvICWXgAZnN0csds",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "studio-4328056510-2ec0c.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "studio-4328056510-2ec0c",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "studio-4328056510-2ec0c.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "168249363166",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:168249363166:web:b6423bfb0e3dbddfbd04f"
 };
 
 // Initialize Firebase App
