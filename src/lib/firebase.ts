@@ -44,3 +44,25 @@ export interface FirestoreErrorInfo {
     email?: string | null;
   };
 }
+export async function testFirestoreConnection(): Promise<boolean> {
+  try {
+    if (!db) return false;
+    return true;
+  } catch (e) {
+    console.error("Firestore connection error:", e);
+    return false;
+  }
+}
+
+export function handleFirestoreError(error: any, operation: OperationType, path: string | null = null): FirestoreErrorInfo {
+  const message = error?.message || "An unknown Firestore error occurred";
+  return {
+    error: message,
+    operationType: operation,
+    path,
+    authInfo: {
+      userId: auth?.currentUser?.uid || null,
+      email: auth?.currentUser?.email || null,
+    }
+  };
+}
