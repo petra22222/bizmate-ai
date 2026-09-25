@@ -1,0 +1,99 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common security helpers
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Validation for UserProfile
+    function isValidUserProfile(data, userId) {
+      return data.uid is string && data.uid == userId
+        && data.email is string && data.email.size() <= 150
+        && (!('name' in data) || (data.name is string && data.name.size() <= 150))
+        && (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500))
+        && (!('plan' in data) || data.plan in ['free', 'pro', 'enterprise'])
+        && (!('role' in data) || data.role in ['user', 'admin']);
+    }
+
+    // Validation for Conversation
+    function isValidConversation(data, userId) {
+      return data.id is string && isValidId(data.id)
+        && data.userId is string && data.userId == userId
+        && data.title is string && data.title.size() <= 200;
+    }
+
+    // Validation for Message
+    function isValidMessage(data, userId, conversationId) {
+      return data.id is string && isValidId(data.id)
+        && data.conversationId is string && data.conversationId == conversationId
+        && data.userId is string && data.userId == userId
+        && data.role in ['user', 'assistant', 'system']
+        && data.content is string && data.content.size() <= 20000;
+    }
+
+    // User Profile rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(incoming(), userId);
+      allow update: if isOwner(userId) && isValidUserProfile(incoming(), userId)
+        && incoming().uid == existing().uid
+        // Prevent normal users from escalating their own role or plan
+        && (!('role' in incoming()) || incoming().role == existing().role || existing().role == 'admin')
+        && (!('plan' in incoming()) || incoming().plan == existing().plan || existing().role == 'admin');
+      allow delete: if isOwner(userId);
+
+      // User Settings Subcollection
+      match /settings/{settingId} {
+        allow get, list: if isOwner(userId);
+        allow create, update: if isOwner(userId);
+        allow delete: if isOwner(userId);
+      }
+
+      // User Conversations Subcollection
+      match /conversations/{conversationId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidConversation(incoming(), userId);
+        allow update: if isOwner(userId) && isValidConversation(incoming(), userId)
+          && incoming().userId == existing().userId;
+        allow delete: if isOwner(userId);
+
+        // Messages inside Conversation
+        match /messages/{messageId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId) && isValidMessage(incoming(), userId, conversationId);
+          allow update: if isOwner(userId) && isValidMessage(incoming(), userId, conversationId)
+            && incoming().userId == existing().userId;
+          allow delete: if isOwner(userId);
+        }
+      }
+    }
+
+    // Test connection check
+    match /test/connection {
+      allow read: if true;
+    }
+  }
+}

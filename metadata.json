@@ -1,0 +1,6 @@
+{
+  "name": "BizMate AI - Autonomous Small Business Assistant",
+  "description": "Modern responsive chat dashboard for small business owners with human-in-the-loop approvals, workflow integrations, and automated actions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
