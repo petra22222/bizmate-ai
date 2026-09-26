@@ -5,24 +5,22 @@ import {
   onAuthStateChanged,
   User as FirebaseUser
 } from 'firebase/auth';
-import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
-import fallbackConfig from '../../firebase-applet-config.json';
+import { getFirestore } from 'firebase/firestore';
 
-// Support both environment variables and fallback config from AI Studio
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyBGKslc4yPJi3wYx2xYvICWXgAZnN0csds",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "studio-4328056510-2ec0c.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "studio-4328056510-2ec0c",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "studio-4328056510-2ec0c.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "168249363166",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:168249363166:web:b6423bfb0e3dbddfbd04f"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 // Initialize Firebase App
 const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
-// CRITICAL: The app will break without specifying the provisioned firestoreDatabaseId
-export const db = getFirestore(app, fallbackConfig.firestoreDatabaseId);
+// Initialize Auth & Firestore
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
@@ -44,6 +42,7 @@ export interface FirestoreErrorInfo {
     email?: string | null;
   };
 }
+
 export async function testFirestoreConnection(): Promise<boolean> {
   try {
     if (!db) return false;
